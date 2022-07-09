@@ -68,8 +68,8 @@ public class MyCatalogFactory implements CatalogFactory {
         return new MyCatalog(
                 context.getName(),
                 helper.getOptions().get(DEFAULT_DATABASE),
+                helper.getOptions().get(URL),
                 helper.getOptions().get(USERNAME),
-                helper.getOptions().get(PASSWORD),
-                helper.getOptions().get(URL));
+                helper.getOptions().get(PASSWORD));
     }
 }

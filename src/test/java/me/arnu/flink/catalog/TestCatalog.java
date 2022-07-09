@@ -50,15 +50,30 @@ public class TestCatalog {
                 .getConfiguration()
                 .setInteger(TABLE_EXEC_RESOURCE_DEFAULT_PARALLELISM.key(), 1);
 
-        // use mysql-catalog
-        tableEnv.registerCatalog(MyCatalogFactoryOptions.IDENTIFIER, catalog);
-        tableEnv.useCatalog(MyCatalogFactoryOptions.IDENTIFIER);
+    }
+
+    @Test
+    public void testSqlCatalog(){
+        ArnuSign.printSign();
+        String createSql = "create catalog mysql_catalog \n" +
+                " with('type'='mysql_catalog',\n" +
+                " 'default-database'='default-database',\n" +
+                " 'mysql-catalog-username'='flink_metastore',\n" +
+                " 'mysql-catalog-password'='flink_metastore',\n" +
+                " 'mysql-catalog-url'='jdbc:mysql://localhost:3306/" +
+                "flink_metastore?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC')";
+        tableEnv.executeSql(createSql);
+        tableEnv.executeSql("use catalog mysql_catalog");
     }
 
     @Test
     public void test() {
         ArnuSign.printSign();
         //1\. 获取上下文环境 table的环境
+
+        // use mysql-catalog
+        tableEnv.registerCatalog(MyCatalogFactoryOptions.IDENTIFIER, catalog);
+        tableEnv.useCatalog(MyCatalogFactoryOptions.IDENTIFIER);
 
         //2\. 读取score.csv
 

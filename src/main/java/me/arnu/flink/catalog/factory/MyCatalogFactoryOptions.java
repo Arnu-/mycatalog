@@ -24,13 +24,16 @@ import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.table.catalog.CommonCatalogOptions;
 
+import java.util.Enumeration;
+import java.util.ResourceBundle;
+
 /**
  * {@link ConfigOption}s for {@link MyCatalog}.
  */
 @Internal
 public class MyCatalogFactoryOptions {
 
-    public static final String IDENTIFIER = "mysql-catalog";
+    public static final String IDENTIFIER = "mysql_catalog";
 
     public static final ConfigOption<String> DEFAULT_DATABASE =
             ConfigOptions.key(CommonCatalogOptions.DEFAULT_DATABASE_KEY)
@@ -38,13 +41,31 @@ public class MyCatalogFactoryOptions {
                     .noDefaultValue();
 
     public static final ConfigOption<String> USERNAME =
-            ConfigOptions.key("username").stringType().noDefaultValue();
+            ConfigOptions.key("mysql-catalog-username").stringType().noDefaultValue();
 
     public static final ConfigOption<String> PASSWORD =
-            ConfigOptions.key("password").stringType().noDefaultValue();
+            ConfigOptions.key("mysql-catalog-password").stringType().noDefaultValue();
 
     public static final ConfigOption<String> URL =
-            ConfigOptions.key("url").stringType().noDefaultValue();
+            ConfigOptions.key("mysql-catalog-url").stringType().noDefaultValue();
+
+    /*static {
+        ResourceBundle rb = ResourceBundle.getBundle("mysql-catalog");
+        String username = rb.getString("mysql-catalog-username");
+        USERNAME = ConfigOptions.key("mysql-catalog-username")
+                .stringType()
+                .defaultValue(username);
+
+        String password = rb.getString("mysql-catalog-password");
+        PASSWORD = ConfigOptions.key("mysql-catalog-password")
+                .stringType()
+                .defaultValue(password);
+
+        String url = rb.getString("mysql-catalog-url");
+        URL = ConfigOptions.key("mysql-catalog-url")
+                .stringType()
+                .defaultValue(url);
+    }*/
 
     private MyCatalogFactoryOptions() {
     }
