@@ -20,16 +20,16 @@ package me.arnu.flink.catalog.factory;
 
 import me.arnu.flink.catalog.MyCatalog;
 import org.apache.flink.annotation.Internal;
-import org.apache.flink.configuration.*;
+import org.apache.flink.configuration.ConfigConstants;
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.table.catalog.CommonCatalogOptions;
 import org.apache.flink.table.catalog.exceptions.CatalogException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 /**
  * {@link ConfigOption}s for {@link MyCatalog}.

@@ -23,8 +23,6 @@ import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.factories.CatalogFactory;
 import org.apache.flink.table.factories.FactoryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,8 +32,6 @@ import static org.apache.flink.table.factories.FactoryUtil.PROPERTY_VERSION;
 
 /** Factory for {@link MyCatalog}. */
 public class MyCatalogFactory implements CatalogFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MyCatalogFactory.class);
 
     @Override
     public String factoryIdentifier() {
