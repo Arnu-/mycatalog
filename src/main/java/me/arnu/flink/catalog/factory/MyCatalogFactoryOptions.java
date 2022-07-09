@@ -20,11 +20,15 @@ package me.arnu.flink.catalog.factory;
 
 import me.arnu.flink.catalog.MyCatalog;
 import org.apache.flink.annotation.Internal;
-import org.apache.flink.configuration.ConfigOption;
-import org.apache.flink.configuration.ConfigOptions;
+import org.apache.flink.configuration.*;
 import org.apache.flink.table.catalog.CommonCatalogOptions;
+import org.apache.flink.table.catalog.exceptions.CatalogException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 /**
@@ -40,32 +44,53 @@ public class MyCatalogFactoryOptions {
                     .stringType()
                     .noDefaultValue();
 
-    public static final ConfigOption<String> USERNAME =
-            ConfigOptions.key("mysql-catalog-username").stringType().noDefaultValue();
+    public static final ConfigOption<String> USERNAME; // =
+    // ConfigOptions.key("mysql-catalog-username").stringType().noDefaultValue();
 
-    public static final ConfigOption<String> PASSWORD =
-            ConfigOptions.key("mysql-catalog-password").stringType().noDefaultValue();
+    public static final ConfigOption<String> PASSWORD; // =
+    // ConfigOptions.key("mysql-catalog-password").stringType().noDefaultValue();
 
-    public static final ConfigOption<String> URL =
-            ConfigOptions.key("mysql-catalog-url").stringType().noDefaultValue();
+    public static final ConfigOption<String> URL; // =
+    //             ConfigOptions.key("mysql-catalog-url").stringType().noDefaultValue();
 
-    /*static {
-        ResourceBundle rb = ResourceBundle.getBundle("mysql-catalog");
-        String username = rb.getString("mysql-catalog-username");
-        USERNAME = ConfigOptions.key("mysql-catalog-username")
-                .stringType()
-                .defaultValue(username);
+    public static final String prefix = "mysql-catalog";
 
-        String password = rb.getString("mysql-catalog-password");
-        PASSWORD = ConfigOptions.key("mysql-catalog-password")
-                .stringType()
-                .defaultValue(password);
+    static {
+        try {
+            String configPath = System.getenv(ConfigConstants.ENV_FLINK_CONF_DIR);
+            if (!configPath.endsWith("/")) {
+                configPath = configPath + "/";
+            }
+            configPath = configPath + addPrefix(".properties");
+            File propFile = new File(configPath);
+            if (!propFile.exists()) {
+                throw new CatalogException("配置文件不存在！");
+            }
+            InputStream is = new FileInputStream(propFile);
+            Properties props = new Properties();
+            props.load(is);
+            String username = props.getProperty(addPrefix("-username"));
+            USERNAME = ConfigOptions.key(addPrefix("-username"))
+                    .stringType()
+                    .defaultValue(username);
 
-        String url = rb.getString("mysql-catalog-url");
-        URL = ConfigOptions.key("mysql-catalog-url")
-                .stringType()
-                .defaultValue(url);
-    }*/
+            String password = props.getProperty(addPrefix("-password"));
+            PASSWORD = ConfigOptions.key(addPrefix("-password"))
+                    .stringType()
+                    .defaultValue(password);
+
+            String url = props.getProperty(addPrefix("-url"));
+            URL = ConfigOptions.key(addPrefix("-url"))
+                    .stringType()
+                    .defaultValue(url);
+        } catch (Exception e) {
+            throw new CatalogException("获取配置信息失败！", e);
+        }
+    }
+
+    private static String addPrefix(String key) {
+        return prefix + key;
+    }
 
     private MyCatalogFactoryOptions() {
     }
