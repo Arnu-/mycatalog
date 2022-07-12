@@ -34,7 +34,9 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/** Test for {@link MyCatalogFactory}. */
+/**
+ * Test for {@link MyCatalogFactory}.
+ */
 public class MyCatalogFactoryTest {
 
     protected static String url;
@@ -54,7 +56,6 @@ public class MyCatalogFactoryTest {
         catalog =
                 new MyCatalog(
                         TEST_CATALOG_NAME,
-                        MyCatalog.DEFAULT_DATABASE,
                         TEST_USERNAME,
                         TEST_PWD,
                         url);
@@ -64,8 +65,6 @@ public class MyCatalogFactoryTest {
     public void test() {
         final Map<String, String> options = new HashMap<>();
         options.put(CommonCatalogOptions.CATALOG_TYPE.key(), MyCatalogFactoryOptions.IDENTIFIER);
-        options.put(
-                MyCatalogFactoryOptions.DEFAULT_DATABASE.key(), MyCatalog.DEFAULT_DATABASE);
         options.put(MyCatalogFactoryOptions.USERNAME.key(), TEST_USERNAME);
         options.put(MyCatalogFactoryOptions.PASSWORD.key(), TEST_PWD);
         options.put(MyCatalogFactoryOptions.URL.key(), url);
@@ -79,7 +78,7 @@ public class MyCatalogFactoryTest {
 
         checkEquals(catalog, (MyCatalog) actualCatalog);
 
-        assertTrue( actualCatalog instanceof MyCatalog);
+        assertTrue(actualCatalog instanceof MyCatalog);
     }
 
     private static void checkEquals(MyCatalog c1, MyCatalog c2) {

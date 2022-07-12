@@ -41,16 +41,15 @@ public class MyCatalogFactory implements CatalogFactory {
     @Override
     public Set<ConfigOption<?>> requiredOptions() {
         final Set<ConfigOption<?>> options = new HashSet<>();
-        options.add(DEFAULT_DATABASE);
-        options.add(USERNAME);
-        options.add(PASSWORD);
-        options.add(URL);
         return options;
     }
 
     @Override
     public Set<ConfigOption<?>> optionalOptions() {
         final Set<ConfigOption<?>> options = new HashSet<>();
+        options.add(USERNAME);
+        options.add(PASSWORD);
+        options.add(URL);
         options.add(PROPERTY_VERSION);
         return options;
     }
@@ -63,10 +62,6 @@ public class MyCatalogFactory implements CatalogFactory {
 
         return new MyCatalog(
                 context.getName(),
-                // helper.getOptions().get(DEFAULT_DATABASE),
-                // 为了避免每次catalog创建的时候制定了更多的默认db，
-                // 这里专门禁止了使用自己定义的默认db。
-                MyCatalog.DEFAULT_DATABASE,
                 helper.getOptions().get(URL),
                 helper.getOptions().get(USERNAME),
                 helper.getOptions().get(PASSWORD));

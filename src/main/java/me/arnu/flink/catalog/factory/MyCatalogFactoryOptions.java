@@ -39,11 +39,6 @@ public class MyCatalogFactoryOptions {
 
     public static final String IDENTIFIER = "mysql_catalog";
 
-    public static final ConfigOption<String> DEFAULT_DATABASE =
-            ConfigOptions.key(CommonCatalogOptions.DEFAULT_DATABASE_KEY)
-                    .stringType()
-                    .noDefaultValue();
-
     public static final ConfigOption<String> USERNAME; // =
     // ConfigOptions.key("mysql-catalog-username").stringType().noDefaultValue();
 

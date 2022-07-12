@@ -22,8 +22,7 @@
 ```roomsql 
 create catalog mycatalog 
     with(
-        'type'='mysql_catalog',
-        'default-database'='default_database'
+        'type'='mysql_catalog'
         );
         
 use catalog mycatalog;
@@ -31,14 +30,13 @@ use catalog mycatalog;
 
 > java
 ```java 
-        String createSql = "create catalog mysql_catalog \n" +
-                " with('type'='mysql_catalog',\n" +
-                " 'default-database'='default_database')";
-                
-        tableEnv.executeSql(createSql);
-        tableEnv.executeSql("use catalog mysql_catalog");
+        MyCatalog catalog =
+                new MyCatalog(
+                        "myCatalog");
+        tableEnv.registerCatalog(MyCatalogFactoryOptions.IDENTIFIER, catalog);
+        tableEnv.useCatalog("myCatalog");
 ```
-在 java 代码中 sql 不需要分号结尾。
+
 
 
 

@@ -40,7 +40,6 @@ public class TestCatalog {
         catalog =
                 new MyCatalog(
                         TEST_CATALOG_NAME,
-                        MyCatalog.DEFAULT_DATABASE,
                         url,
                         TEST_USERNAME,
                         TEST_PWD);
@@ -57,7 +56,6 @@ public class TestCatalog {
         ArnuSign.printSign();
         String createSql = "create catalog mysql_catalog \n" +
                 " with('type'='mysql_catalog',\n" +
-                " 'default-database'='default-database',\n" +
                 " 'mysql-catalog-username'='flink_metastore',\n" +
                 " 'mysql-catalog-password'='flink_metastore',\n" +
                 " 'mysql-catalog-url'='jdbc:mysql://localhost:3306/" +

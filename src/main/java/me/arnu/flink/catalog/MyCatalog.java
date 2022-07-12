@@ -8,6 +8,7 @@ create @ 2022/6/20
 */
 package me.arnu.flink.catalog;
 
+import me.arnu.flink.catalog.factory.MyCatalogFactoryOptions;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.exceptions.*;
@@ -32,7 +33,7 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
  * 自定义 catalog
  * 检查connection done.
  * 默认db，会被强制指定，不管输入的是什么，都会指定为 default_database
- * todo: 读取配置文件信息来获取数据库连接，而不是在sql语句中强制指定。
+ * 可以读取配置文件信息来获取数据库连接，而不是在sql语句中强制指定。
  */
 public class MyCatalog extends AbstractCatalog {
 
@@ -117,13 +118,7 @@ public class MyCatalog extends AbstractCatalog {
     /**
      * 默认database
      */
-    private final String defaultDatabase = "default_database";
-
-    /**
-     * 用户指定的默认database，我们要忽略它。
-     */
-    private final String userDefinedDefaultDatabase;
-
+    private static final String defaultDatabase = "default_database";
 
     /**
      * 数据库用户名
@@ -153,7 +148,6 @@ public class MyCatalog extends AbstractCatalog {
     }
 
     public MyCatalog(String name,
-                     String defaultDatabase,
                      String url,
                      String user,
                      String pwd) {
@@ -161,7 +155,14 @@ public class MyCatalog extends AbstractCatalog {
         this.url = url;
         this.user = user;
         this.pwd = pwd;
-        this.userDefinedDefaultDatabase = defaultDatabase;
+    }
+
+
+    public MyCatalog(String name) {
+        super(name, defaultDatabase);
+        this.url = MyCatalogFactoryOptions.URL.defaultValue();
+        this.user = MyCatalogFactoryOptions.USERNAME.defaultValue();
+        this.pwd = MyCatalogFactoryOptions.PASSWORD.defaultValue();
     }
 
     @Override
@@ -243,9 +244,6 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public CatalogDatabase getDatabase(String databaseName)
             throws DatabaseNotExistException, CatalogException {
-        if(databaseName.equals(userDefinedDefaultDatabase)){
-            databaseName = defaultDatabase;
-        }
         String querySql = "SELECT id, database_name,description " +
                 " FROM metadata_database where database_name=?";
         Connection conn = getConnection();
@@ -291,9 +289,6 @@ public class MyCatalog extends AbstractCatalog {
     }
 
     private Integer getDatabaseId(String databaseName) throws CatalogException {
-        if(databaseName.equals(userDefinedDefaultDatabase)){
-            databaseName = defaultDatabase;
-        }
         String querySql = "select id from metadata_database where database_name=?";
         Connection conn = getConnection();
         try (PreparedStatement ps = conn.prepareStatement(querySql)) {
@@ -322,9 +317,6 @@ public class MyCatalog extends AbstractCatalog {
 
         checkArgument(!StringUtils.isNullOrWhitespaceOnly(databaseName));
         checkNotNull(db);
-        if(databaseName.equals(userDefinedDefaultDatabase)){
-            databaseName = defaultDatabase;
-        }
         if (databaseExists(databaseName)) {
             if (!ignoreIfExists) {
                 throw new DatabaseAlreadyExistException(getName(), databaseName);
@@ -366,7 +358,7 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public void dropDatabase(String name, boolean ignoreIfNotExists, boolean cascade)
             throws DatabaseNotExistException, DatabaseNotEmptyException, CatalogException {
-        if(name.equals(userDefinedDefaultDatabase)){
+        if (name.equals(defaultDatabase)) {
             throw new CatalogException("默认 database 不可以删除");
         }
         // 1、取出db id，
@@ -417,6 +409,9 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public void alterDatabase(String name, CatalogDatabase newDb, boolean ignoreIfNotExists)
             throws DatabaseNotExistException, CatalogException {
+        if (name.equals(defaultDatabase)) {
+            throw new CatalogException("默认 database 不可以修改");
+        }
         // 1、取出db id，
         Integer id = getDatabaseId(name);
         if (id == null) {
@@ -471,9 +466,6 @@ public class MyCatalog extends AbstractCatalog {
 
     protected List<String> listTablesViews(String databaseName, String tableType)
             throws DatabaseNotExistException, CatalogException {
-        if(databaseName.equals(userDefinedDefaultDatabase)){
-            databaseName = defaultDatabase;
-        }
         Integer databaseId = getDatabaseId(databaseName);
         if (null == databaseId) {
             throw new DatabaseNotExistException(getName(), databaseName);
@@ -610,9 +602,6 @@ public class MyCatalog extends AbstractCatalog {
     }
 
     private Integer getTableId(ObjectPath tablePath) {
-        if(tablePath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            tablePath = new ObjectPath(defaultDatabase, tablePath.getObjectName());
-        }
         Integer dbId = getDatabaseId(tablePath.getDatabaseName());
         if (dbId == null) {
             return null;
@@ -677,9 +666,6 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public void renameTable(ObjectPath tablePath, String newTableName, boolean ignoreIfNotExists)
             throws TableNotExistException, TableAlreadyExistException, CatalogException {
-        if(tablePath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            tablePath = new ObjectPath(defaultDatabase, tablePath.getObjectName());
-        }
         Integer id = getTableId(tablePath);
 
         if (id == null) {
@@ -704,9 +690,6 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public void createTable(ObjectPath tablePath, CatalogBaseTable table, boolean ignoreIfExists)
             throws TableAlreadyExistException, DatabaseNotExistException, CatalogException {
-        if(tablePath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            tablePath = new ObjectPath(defaultDatabase, tablePath.getObjectName());
-        }
         Integer db_id = getDatabaseId(tablePath.getDatabaseName());
         if (null == db_id) {
             throw new DatabaseNotExistException(getName(), tablePath.getDatabaseName());
@@ -950,10 +933,8 @@ public class MyCatalog extends AbstractCatalog {
     }
 
     @Override
-    public CatalogFunction getFunction(ObjectPath functionPath) throws FunctionNotExistException, CatalogException {
-        if(functionPath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            functionPath = new ObjectPath(defaultDatabase, functionPath.getObjectName());
-        }
+    public CatalogFunction getFunction(ObjectPath functionPath)
+            throws FunctionNotExistException, CatalogException {
         Integer id = getFunctionId(functionPath);
         if (null == id) {
             throw new FunctionNotExistException(getName(), functionPath);
@@ -988,9 +969,6 @@ public class MyCatalog extends AbstractCatalog {
     }
 
     private Integer getFunctionId(ObjectPath functionPath) {
-        if(functionPath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            functionPath = new ObjectPath(defaultDatabase, functionPath.getObjectName());
-        }
         Integer dbId = getDatabaseId(functionPath.getDatabaseName());
         if (dbId == null) {
             return null;
@@ -1018,9 +996,6 @@ public class MyCatalog extends AbstractCatalog {
     @Override
     public void createFunction(ObjectPath functionPath, CatalogFunction function, boolean ignoreIfExists)
             throws FunctionAlreadyExistException, DatabaseNotExistException, CatalogException {
-        if(functionPath.getDatabaseName().equals(userDefinedDefaultDatabase)){
-            functionPath = new ObjectPath(defaultDatabase, functionPath.getObjectName());
-        }
         Integer dbId = getDatabaseId(functionPath.getDatabaseName());
         if (null == dbId) {
             throw new DatabaseNotExistException(getName(), functionPath.getDatabaseName());
